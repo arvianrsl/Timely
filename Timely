@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timely - Aplikasi Pengingat</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts - Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #E5E1D0;
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #00CCFF 0%, #0099CC 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header h1 {
+            font-weight: 700;
+            font-size: 28px;
+            margin: 0;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin: 5px 0 0 0;
+        }
+        
+        .container-main {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .add-btn {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #00CCFF 0%, #0099CC 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0,204,255,0.4);
+            cursor: pointer;
+            z-index: 99;
+            transition: all 0.3s ease;
+        }
+        
+        .add-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0,204,255,0.6);
+        }
+        
+        .reminder-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            transition: all 0.3s ease;
+            border-left: 5px solid #00CCFF;
+        }
+        
+        .reminder-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        
+        .reminder-card.completed {
+            opacity: 0.6;
+            border-left-color: #28a745;
+        }
+        
+        .reminder-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .reminder-title {
+            font-weight: 600;
+            font-size: 18px;
+            color: #333;
+            flex: 1;
+        }
+        
+        .reminder-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+            transition: all 0.2s;
+        }
+        
+        .btn-action:hover {
+            transform: scale(1.2);
+        }
+        
+        .btn-complete {
+            color: #28a745;
+        }
+        
+        .btn-edit {
+            color: #00CCFF;
+        }
+        
+        .btn-delete {
+            color: #dc3545;
+        }
+        
+        .reminder-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .category-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #D2F7FF;
+            color: #0099CC;
+        }
+        
+        .priority-high {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .priority-normal {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .priority-low {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #666;
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .nav-item i {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .nav-item.active {
+            color: #00CCFF;
+        }
+        
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #00CCFF 0%, #0099CC 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            border: none;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #E5E1D0;
+            padding: 12px;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #00CCFF;
+            box-shadow: 0 0 0 0.2rem rgba(0,204,255,0.25);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00CCFF 0%, #0099CC 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,204,255,0.4);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-state i {
+            font-size: 80px;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+        
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        
+        .filter-tab {
+            padding: 8px 20px;
+            background: white;
+            border: 2px solid #E5E1D0;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .filter-tab.active {
+            background: #00CCFF;
+            color: white;
+            border-color: #00CCFF;
+        }
+        
+        .dark-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 101;
+            transition: all 0.3s;
+        }
+        
+        .dark-mode-toggle:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(180deg);
+        }
+        
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .reminder-card {
+            background: #2d2d2d;
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .reminder-title {
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .reminder-info {
+            color: #b0b0b0;
+        }
+        
+        body.dark-mode .bottom-nav {
+            background: #2d2d2d;
+        }
+        
+        body.dark-mode .filter-tab {
+            background: #2d2d2d;
+            color: #e0e0e0;
+            border-color: #444;
+        }
+        
+        body.dark-mode .modal-content {
+            background: #2d2d2d;
+            color: #e0e0e0;
+        }
+        
+        body.dark-mode .form-control,
+        body.dark-mode .form-select {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            border-color: #444;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .reminder-card {
+            animation: slideIn 0.4s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Dark Mode Toggle -->
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <!-- Header -->
+    <div class="header">
+        <h1><i class="fas fa-clock"></i> Timely</h1>
+        <p>Pengingat Pintar untuk Hari yang Lebih Teratur</p>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container-main">
+        <!-- Filter Tabs -->
+        <div class="filter-tabs" id="filterTabs">
+            <div class="filter-tab active" onclick="filterReminders('all')">
+                <i class="fas fa-list"></i> Semua
+            </div>
+            <div class="filter-tab" onclick="filterReminders('today')">
+                <i class="fas fa-calendar-day"></i> Hari Ini
+            </div>
+            <div class="filter-tab" onclick="filterReminders('upcoming')">
+                <i class="fas fa-calendar-week"></i> Mendatang
+            </div>
+            <div class="filter-tab" onclick="filterReminders('high')">
+                <i class="fas fa-exclamation-circle"></i> Penting
+            </div>
+        </div>
+
+        <!-- Reminders List -->
+        <div id="remindersList"></div>
+
+        <!-- History List (hidden by default) -->
+        <div id="historyList" style="display: none;"></div>
+
+        <!-- Settings (hidden by default) -->
+        <div id="settingsPage" style="display: none;">
+            <div class="reminder-card">
+                <h4><i class="fas fa-cog"></i> Pengaturan</h4>
+                <div class="mt-3">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="notificationSwitch" checked>
+                        <label class="form-check-label" for="notificationSwitch">
+                            <i class="fas fa-bell"></i> Aktifkan Notifikasi
+                        </label>
+                    </div>
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="soundSwitch" checked>
+                        <label class="form-check-label" for="soundSwitch">
+                            <i class="fas fa-volume-up"></i> Suara Notifikasi
+                        </label>
+                    </div>
+                    <button class="btn btn-danger w-100 mt-3" onclick="clearAllData()">
+                        <i class="fas fa-trash"></i> Hapus Semua Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Button -->
+    <button class="add-btn" onclick="openAddModal()">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="showPage('home')">
+            <i class="fas fa-home"></i>
+            <span>Beranda</span>
+        </div>
+        <div class="nav-item" onclick="showPage('history')">
+            <i class="fas fa-history"></i>
+            <span>Riwayat</span>
+        </div>
+        <div class="nav-item" onclick="showPage('settings')">
+            <i class="fas fa-cog"></i>
+            <span>Pengaturan</span>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal fade" id="reminderModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">
+                        <i class="fas fa-plus-circle"></i> Tambah Pengingat
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="reminderForm">
+                        <input type="hidden" id="reminderId">
+                        
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-heading"></i> Judul Pengingat</label>
+                            <input type="text" class="form-control" id="reminderTitle" placeholder="Contoh: Rapat Tim" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-calendar"></i> Tanggal</label>
+                            <input type="date" class="form-control" id="reminderDate" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-clock"></i> Waktu</label>
+                            <input type="time" class="form-control" id="reminderTime" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-folder"></i> Kategori</label>
+                            <select class="form-select" id="reminderCategory">
+                                <option value="Kuliah">Kuliah</option>
+                                <option value="Kerja">Kerja</option>
+                                <option value="Pribadi">Pribadi</option>
+                                <option value="Olahraga">Olahraga</option>
+                                <option value="Kesehatan">Kesehatan</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-flag"></i> Prioritas</label>
+                            <select class="form-select" id="reminderPriority">
+                                <option value="high">Penting</option>
+                                <option value="normal" selected>Normal</option>
+                                <option value="low">Rendah</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-repeat"></i> Pengulangan</label>
+                            <select class="form-select" id="reminderRepeat">
+                                <option value="none">Tidak Berulang</option>
+                                <option value="daily">Setiap Hari</option>
+                                <option value="weekly">Setiap Minggu</option>
+                                <option value="monthly">Setiap Bulan</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label"><i class="fas fa-sticky-note"></i> Catatan (Opsional)</label>
+                            <textarea class="form-control" id="reminderNote" rows="3" placeholder="Tambahkan catatan..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-save"></i> Simpan Pengingat
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Anime.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+    <script>
+        let reminders = JSON.parse(localStorage.getItem('reminders')) || [];
+        let history = JSON.parse(localStorage.getItem('history')) || [];
+        let currentFilter = 'all';
+        let editingId = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadReminders();
+            checkNotifications();
+            setInterval(checkNotifications, 60000); // Check every minute
+            
+            // Set default date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('reminderDate').value = today;
+            
+            // Request notification permission
+            if (Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        });
+
+        // Form Submit
+        document.getElementById('reminderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveReminder();
+        });
+
+        function openAddModal() {
+            editingId = null;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Tambah Pengingat';
+            document.getElementById('reminderForm').reset();
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('reminderDate').value = today;
+            const modal = new bootstrap.Modal(document.getElementById('reminderModal'));
+            modal.show();
+        }
+
+        function saveReminder() {
+            const reminder = {
+                id: editingId || Date.now(),
+                title: document.getElementById('reminderTitle').value,
+                date: document.getElementById('reminderDate').value,
+                time: document.getElementById('reminderTime').value,
+                category: document.getElementById('reminderCategory').value,
+                priority: document.getElementById('reminderPriority').value,
+                repeat: document.getElementById('reminderRepeat').value,
+                note: document.getElementById('reminderNote').value,
+                completed: false,
+                createdAt: editingId ? reminders.find(r => r.id === editingId).createdAt : new Date().toISOString()
+            };
+
+            if (editingId) {
+                const index = reminders.findIndex(r => r.id === editingId);
+                reminders[index] = reminder;
+            } else {
+                reminders.push(reminder);
+            }
+
+            localStorage.setItem('reminders', JSON.stringify(reminders));
+            loadReminders();
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('reminderModal'));
+            modal.hide();
+            
+            showNotification('Berhasil!', editingId ? 'Pengingat berhasil diperbarui' : 'Pengingat berhasil ditambahkan');
+        }
+
+        function loadReminders() {
+            const container = document.getElementById('remindersList');
+            let filteredReminders = reminders.filter(r => !r.completed);
+
+            // Apply filter
+            const today = new Date().toISOString().split('T')[0];
+            if (currentFilter === 'today') {
+                filteredReminders = filteredReminders.filter(r => r.date === today);
+            } else if (currentFilter === 'upcoming') {
+                filteredReminders = filteredReminders.filter(r => r.date > today);
+            } else if (currentFilter === 'high') {
+                filteredReminders = filteredReminders.filter(r => r.priority === 'high');
+            }
+
+            // Sort by date and time
+            filteredReminders.sort((a, b) => {
+                const dateA = new Date(a.date + ' ' + a.time);
+                const dateB = new Date(b.date + ' ' + b.time);
+                return dateA - dateB;
+            });
+
+            if (filteredReminders.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-check"></i>
+                        <h4>Tidak Ada Pengingat</h4>
+                        <p>Tekan tombol + untuk menambah pengingat baru</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredReminders.map(reminder => `
+                <div class="reminder-card">
+                    <div class="reminder-header">
+                        <div class="reminder-title">${reminder.title}</div>
+                        <div class="reminder-actions">
+                            <button class="btn-action btn-complete" onclick="completeReminder(${reminder.id})" title="Selesai">
+                                <i class="fas fa-check-circle"></i>
+                            </button>
+                            <button class="btn-action btn-edit" onclick="editReminder(${reminder.id})" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-action btn-delete" onclick="deleteReminder(${reminder.id})" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="reminder-info">
+                        <div class="info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>${formatDate(reminder.date)}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span>${reminder.time}</span>
+                        </div>
+                        ${reminder.repeat !== 'none' ? `
+                        <div class="info-item">
+                            <i class="fas fa-repeat"></i>
+                            <span>${getRepeatText(reminder.repeat)}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="mt-2">
+                        <span class="category-badge">${reminder.category}</span>
+                        <span class="category-badge priority-${reminder.priority}">${getPriorityText(reminder.priority)}</span>
+                    </div>
+                    ${reminder.note ? `<div class="mt-2" style="font-size: 14px; color: #666;"><i class="fas fa-sticky-note"></i> ${reminder.note}</div>` : ''}
+                </div>
+            `).join('');
+
+            // Animate cards
+            anime({
+                targets: '.reminder-card',
+                opacity: [0, 1],
+                translateY: [20, 0],
+                delay: anime.stagger(100)
+            });
+        }
+
+        function loadHistory() {
+            const container = document.getElementById('historyList');
+            
+            if (history.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-history"></i>
+                        <h4>Belum Ada Riwayat</h4>
+                        <p>Pengingat yang selesai akan muncul di sini</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = history.map(reminder => `
+                <div class="reminder-card completed">
+                    <div class="reminder-header">
+                        <div class="reminder-title">${reminder.title}</div>
+                        <div class="reminder-actions">
+                            <button class="btn-action btn-delete" onclick="deleteFromHistory(${reminder.id})" title="Hapus Permanen">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="reminder-info">
+                        <div class="info-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>${formatDate(reminder.date)}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span>${reminder.time}</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Selesai</span>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <span class="category-badge">${reminder.category}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function editReminder(id) {
+            const reminder = reminders.find(r => r.id === id);
+            if (!reminder) return;
+
+            editingId = id;
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Edit Pengingat';
+            document.getElementById('reminderTitle').value = reminder.title;
+            document.getElementById('reminderDate').value = reminder.date;
+            document.getElementById('reminderTime').value = reminder.time;
+            document.getElementById('reminderCategory').value = reminder.category;
+            document.getElementById('reminderPriority').value = reminder.priority;
+            document.getElementById('reminderRepeat').value = reminder.repeat;
+            document.getElementById('reminderNote').value = reminder.note;
+
+            const modal = new bootstrap.Modal(document.getElementById('reminderModal'));
+            modal.show();
+        }
+
+        function deleteReminder(id) {
+            if (confirm('Yakin ingin menghapus pengingat ini?')) {
+                reminders = reminders.filter(r => r.id !== id);
+                localStorage.setItem('reminders', JSON.stringify(reminders));
+                loadReminders();
+                showNotification('Berhasil!', 'Pengingat berhasil dihapus');
+            }
+        }
+
+        function completeReminder(id) {
+            const reminder = reminders.find(r => r.id === id);
+            if (!reminder) return;
+
+            reminder.completed = true;
+            reminder.completedAt = new Date().toISOString();
+            
+            history.unshift(reminder);
+            reminders = reminders.filter(r => r.id !== id);
+            
+            localStorage.setItem('reminders', JSON.stringify(reminders));
+            localStorage.setItem('history', JSON.stringify(history));
+            
+            loadReminders();
+            showNotification('Selesai!', 'Pengingat ditandai sebagai selesai');
+        }
+
+        function deleteFromHistory(id) {
+            if (confirm('Hapus permanen dari riwayat?')) {
+                history = history.filter(r => r.id !== id);
+                localStorage.setItem('history', JSON.stringify(history));
+                loadHistory();
+                showNotification('Berhasil!', 'Riwayat berhasil dihapus');
+            }
+        }
+
+        function filterReminders(filter) {
+            currentFilter = filter;
+            
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.closest('.filter-tab').classList.add('active');
+            
+            loadReminders();
+        }
+
+        function showPage(page) {
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.nav-item').classList.add('active');
+
+            // Show/hide pages
+            document.getElementById('remindersList').style.display = 'none';
+            document.getElementById('historyList').style.display = 'none';
+            document.getElementById('settingsPage').style.display = 'none';
+            document.getElementById('filterTabs').style.display = 'none';
+
+            if (page === 'home') {
+                document.getElementById('remindersList').style.display = 'block';
+                document.getElementById('filterTabs').style.display = 'flex';
+                loadReminders();
+            } else if (page === 'history') {
+                document.getElementById('historyList').style.display = 'block';
+                loadHistory();
+            } else if (page === 'settings') {
+                document.getElementById('settingsPage').style.display = 'block';
+            }
+        }
+
+        function checkNotifications() {
+            const now = new Date();
+            const currentDate = now.toISOString().split('T')[0];
+            const currentTime = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+
+            reminders.forEach(reminder => {
+                if (!reminder.notified && reminder.date === currentDate && reminder.time <= currentTime) {
+                    sendNotification(reminder);
+                    reminder.notified = true;
+                    localStorage.setItem('reminders', JSON.stringify(reminders));
+                }
+            });
+        }
+
+        function sendNotification(reminder) {
+            const notificationEnabled = document.getElementById('notificationSwitch').checked;
+            if (!notificationEnabled) return;
+
+            if (Notification.permission === 'granted') {
+                new Notification('⏰ Timely Reminder', {
+                    body: `${reminder.title}\n${reminder.time} - ${reminder.category}`,
+                    icon: 'https://cdn-icons-png.flaticon.com/512/2738/2738055.png',
+                    badge: 'https://cdn-icons-png.flaticon.com/512/2738/2738055.png'
+                });
+            }
+
+            // Play sound if enabled
+            const soundEnabled = document.getElementById('soundSwitch').checked;
+            if (soundEnabled) {
+                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuAzfPTgjMGHG7A7+OZRA0PVant7bFiFQdKouPxt2ofBDGJ0fPPfzAGKHvK7+CURg0SYLLo6qhWFQpIn+DywWwhBSh9y+/dkUINFly06OiqVxQJSaDf8L5qIQMte8rv3pFFDBNftuvpqVYUCUug3vC+aiEDLXvK796RRwwSXrTr6alWFApLn97xvWogAy99ye7fkkYMEVy06+moVhUJS5/e8L5qIQMte8rv3I8=');
+                audio.play().catch(() => {});
+            }
+
+            showNotification('⏰ Pengingat!', reminder.title);
+        }
+
+        function showNotification(title, message) {
+            // Create toast notification
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                z-index: 9999;
+                max-width: 300px;
+                animation: slideIn 0.3s ease;
+            `;
+            toast.innerHTML = `
+                <div style="font-weight: 600; color: #00CCFF; margin-bottom: 5px;">${title}</div>
+                <div style="color: #666; font-size: 14px;">${message}</div>
+            `;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDark);
+            
+            const icon = document.querySelector('.dark-mode-toggle i');
+            icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        function clearAllData() {
+            if (confirm('Yakin ingin menghapus semua data? Tindakan ini tidak dapat dibatalkan!')) {
+                localStorage.clear();
+                reminders = [];
+                history = [];
+                showNotification('Berhasil!', 'Semua data telah dihapus');
+                loadReminders();
+                loadHistory();
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('id-ID', options);
+        }
+
+        function getPriorityText(priority) {
+            const priorities = {
+                high: 'Penting',
+                normal: 'Normal',
+                low: 'Rendah'
+            };
+            return priorities[priority] || priority;
+        }
+
+        function getRepeatText(repeat) {
+            const repeats = {
+                none: 'Tidak Berulang',
+                daily: 'Setiap Hari',
+                weekly: 'Setiap Minggu',
+                monthly: 'Setiap Bulan'
+            };
+            return repeats[repeat] || repeat;
+        }
+
+        // Load dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            document.querySelector('.dark-mode-toggle i').className = 'fas fa-sun';
+        }
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideOut {
+                to {
+                    opacity: 0;
+                    transform: translateX(400px);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
